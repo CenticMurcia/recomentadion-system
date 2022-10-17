@@ -402,7 +402,7 @@ class RecSys():
         display(Image.fromarray(matrix))
         
         plt.figure(figsize=((4,2)))
-        plt.title("Matriz")
+        plt.title("Variable a predecir")
         plt.hist(self.samples.score, bins=20)
         plt.show()
 
