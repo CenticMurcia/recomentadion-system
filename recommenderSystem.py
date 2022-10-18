@@ -140,7 +140,7 @@ class RecSys():
         """Devuelve las sugerencias (ids de producto) para ciertos usarios filtrados."""
 
         return self.emb_similaritySearch(
-                        query_emb     = self.get_users_avgEmb(users_ids),
+                        query_emb     = self.get_users_avgEmb(user_ids),
                         searchOn_embs = self.item_embs,
                         searchOn_ids  = self.unique_item_ids,
                         limit         = limit)
@@ -158,7 +158,7 @@ class RecSys():
         """Devuelve la audiencia (ids de usuarios) para ciertos productos filtrados."""
 
         return self.emb_similaritySearch(
-                        query_emb     = self.get_items_avgEmb(items_ids),
+                        query_emb     = self.get_items_avgEmb(item_ids),
                         searchOn_embs = self.user_embs,
                         searchOn_ids  = self.unique_user_ids,
                         limit         = limit)
@@ -168,7 +168,7 @@ class RecSys():
         """Devuelve los ids de producto que normalmente se compran junto a este producto."""
 
         return self.emb_similaritySearch(
-                        query_emb     = get_item_emb(item_id),
+                        query_emb     = self.get_item_emb(item_id),
                         searchOn_embs = self.item_embs,
                         searchOn_ids  = self.unique_item_ids,
                         limit         = limit)
@@ -285,6 +285,7 @@ class RecSys():
  
 
         if valid_samples is None:
+            self.trained = 1
             train_log = np.array([], dtype=[('epoch', "u1"), ('train_mae', "f"), ('train_mse', "f")])
         else:
             train_log = np.array([], dtype=[('epoch', "u1"), ('train_mae', "f"), ('train_mse', "f"), ('valid_mae', "f"), ('valid_mse', "f")])
@@ -306,6 +307,9 @@ class RecSys():
                 valid_mae, valid_mse = self.error(valid_samples)
                 train_log = np.append(train_log, np.array([(i+1,train_mae,train_mse,valid_mae,valid_mse)], dtype=train_log.dtype))
                 print("Epoch: %d ; trMAE = %.4f trMSE = %.4f valMAE = %.4f valMSE = %.4f" % (i+1, train_mae, train_mse, valid_mae, valid_mse))
+                
+        self.user_embs = self.l2_norm(self.user_embs)
+        self.item_embs = self.l2_norm(self.item_embs)
 
         return train_log
 
