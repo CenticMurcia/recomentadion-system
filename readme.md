@@ -41,43 +41,43 @@ tabla userXprod_pesos. Los pares (userId,prodId) deben ser unicos:
 
 ### Entrenar modelo para empresa
 
-"""python
+```python
 def entrenar_modelo(df_user, df_prod, df_userXprod_afinindad)
-	return modelo
-"""
+    return modelo
+```
 
 ### Listar usuarios afines por producto concreto
 
-"""python
+```python
 def sacar_adiencias_de_prod(modelo, prod_id)
-	return lista_usuarios_afines
-"""
+    return lista_usuarios_afines
+```
 
 ### Listar usuarios afines por producto filtros
 
-"""python
+```python
 def sacar_adiencias_de_prod_nuevo(modelo, prod_criterios={categoria, subcategoria}):
-	return lista_usuarios_afines
-"""
+    return lista_usuarios_afines
+```
 
 ### Listar productos afines por usario concreto
 
-"""python
+```python
 def sugerir_prods_a_usuario(modelo, user_id):
-	return lista_de_productos_a_sugerir
-"""
+    return lista_de_productos_a_sugerir
+```
 
 ### Listar productos afines por usario filtros
 
-"""python
+```python
 def sugerir_prods_a_usuario_anonimo(modelo, user_criterios={edad, sexo, loaclidad})
-	return lista_de_productos_a_sugerir
-"""
+    return lista_de_productos_a_sugerir
+```
 
 ### Productos que normalmente se compran juntos
 
-"""python
+```python
 def productos_sugeridos(modelo, prod_id, user_id)
-	return lista_de_productos_a_sugerir
-"""
+    return lista_de_productos_a_sugerir
+```
 
