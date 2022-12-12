@@ -125,6 +125,19 @@ class RecSysFastai():
                         searchOn_embs = self.user_embs.weight,
                         searchOn_ids  = self.users,
                         limit         = limit)
+    
+    
+    
+    # USUARIO(S) + PRODUCTO(S) --> PRODUCTOS
+
+    def sugerir_productos_a_pareja_user_prod(self, user_ids, item_ids, limit=0.3):
+
+        return self.emb_similaritySearch(
+                    query_emb     = self.get_emb(user_ids, is_item=False) * 0.5 + \
+                                    self.get_emb(item_ids, is_item=True) * 0.5,
+                    searchOn_embs = self.item_embs.weight,
+                    searchOn_ids  = self.items,
+                    limit         = limit)
 
 
     #################################### FUNCIONES  ####################################
