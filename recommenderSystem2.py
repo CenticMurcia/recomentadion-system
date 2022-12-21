@@ -75,19 +75,22 @@ class CollabFilteringDataset(torch.utils.data.Dataset):
 
 class Model(torch.nn.Module):
 
-	def __init__(self, df_pairs, COMMON_EMB_DIM = 32):
+	def __init__(self, df_pairs, df_users, df_items, COMMON_EMB_DIM = 32):
 
 		super().__init__()
+
+		NUM_USER_FEATS = len(df_users.columns)
+		NUM_ITEM_FEATS = len(df_items.columns)
 
 		self.ids_active_users,_ = torch.from_numpy(df_pairs.user_id.unique()).sort()
 		self.user_id_embed_W = torch.nn.Embedding(len(self.ids_active_users), COMMON_EMB_DIM)
 		self.user_id_embed_B = torch.nn.Embedding(len(self.ids_active_users), 1)
-		self.user_linear_1   = torch.nn.Linear(4, COMMON_EMB_DIM) # 4 (genero)
+		self.user_linear_1   = torch.nn.Linear(NUM_USER_FEATS, COMMON_EMB_DIM) # 4 (genero) --> 32
 
 		self.ids_active_items,_ = torch.from_numpy(df_pairs.item_id.unique()).sort()
 		self.item_id_embed_W = torch.nn.Embedding(len(self.ids_active_items), COMMON_EMB_DIM)
 		self.item_id_embed_B = torch.nn.Embedding(len(self.ids_active_items), 1)
-		self.item_linear_1   = torch.nn.Linear(1065, 200) # 1 (precio) + 37 (familias) + 1027 (features)
+		self.item_linear_1   = torch.nn.Linear(NUM_ITEM_FEATS, 200) # 1 (precio) + 37 (familias) + 1027 (features) --> 32
 		self.item_linear_2   = torch.nn.Linear(200, COMMON_EMB_DIM)
 
 	
@@ -175,7 +178,7 @@ class RecSys2():
 
 
 		print("Entrenando modelo...")
-		model = Model(ds.df_pairs)
+		model = Model(ds.df_pairs, ds.df_users, ds.df_items)
 		loss  = torch.nn.MSELoss()
 		optim = torch.optim.Adam(model.parameters(), lr=LEARNING_RATE, weight_decay=WEIGHT_DECAY)
 		error = -1
@@ -237,7 +240,7 @@ class RecSys2():
 	#################################### PARA USAR ####################################
 	#################################### EL MODELO ####################################
 
-
+	###### FUNCION FLEXIBLE QUE SE PUEDE USAR PARA OBTENER TODO TIPO DE RECOMENDACIONES
 
 	def recomendar(self,
 		query_user_ids = [],
@@ -311,7 +314,7 @@ class RecSys2():
 
 
 
-
+	####### FUNCIONES EXTRA, PERO REALMENTE NO NECESARIAS, SON UNA FORMA DISTINTA DE LLAMAR A recomendar()
 
 
 	# USUARIO(S) --> PRODUCTOS
@@ -350,9 +353,3 @@ class RecSys2():
 
 	def productosActivos_parecidos(self, item_ids, limit):
 		return self.recomendar(query_item_ids=item_ids, searchOn_act_items=True, limit=limit)
-
-
-
-
-
-r = RecSys2()
