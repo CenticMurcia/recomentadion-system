@@ -245,6 +245,7 @@ class RecSys2():
 	def recomendar(self,
 		query_user_ids = [],
 		query_item_ids = [],
+		peso_query_user = 0.5,  #peso_query_item = 1 - peso_query_user
 		searchOn_new_users = False,
 		searchOn_act_users = False,
 		searchOn_new_items = False,
@@ -252,22 +253,31 @@ class RecSys2():
 		limit=0.5):
 
 
+		assert peso_query_user > 0 and peso_query_user < 1
 		assert limit > 0 and limit < 1
 
 
 		# 1) Formar el embedding consulta (query)
 
-		all_user_ids       = torch.cat([self.activeUser_ids,  self.newUser_ids])
-		all_user_embs      = torch.cat([self.activeUser_embs, self.newUser_embs])
-		selected_user_pos  = torch.isin(elements = all_user_ids, test_elements = torch.tensor(query_user_ids) )
-		selected_user_embs = all_user_embs[ selected_user_pos ]
+		if query_user_ids: # Empty list == False
 
-		all_item_ids       = torch.cat([self.activeItem_ids,  self.newItem_ids])
-		all_item_embs      = torch.cat([self.activeItem_embs, self.newItem_embs])
-		selected_item_pos  = torch.isin(elements = all_item_ids, test_elements = torch.tensor(query_item_ids) )
-		selected_item_embs = all_item_embs[ selected_item_pos ]
+			all_user_ids       = torch.cat([self.activeUser_ids,  self.newUser_ids])
+			all_user_embs      = torch.cat([self.activeUser_embs, self.newUser_embs])
+			selected_user_pos  = torch.isin(elements = all_user_ids, test_elements = torch.tensor(query_user_ids) )
+			selected_user_embs = all_user_embs[ selected_user_pos ]
+			query_user_emb     = selected_user_embs.mean(0)
+			QUERY_EMBEDDING    = query_user_emb
 
-		QUERY_EMBEDDING    = torch.cat( [selected_user_embs, selected_item_embs] ).mean(0)
+		if query_item_ids:
+			all_item_ids       = torch.cat([self.activeItem_ids,  self.newItem_ids])
+			all_item_embs      = torch.cat([self.activeItem_embs, self.newItem_embs])
+			selected_item_pos  = torch.isin(elements = all_item_ids, test_elements = torch.tensor(query_item_ids) )
+			selected_item_embs = all_item_embs[ selected_item_pos ]
+			query_item_emb     = selected_item_embs.mean(0)
+			QUERY_EMBEDDING    = query_item_emb
+
+		if query_user_ids and query_item_ids:
+			QUERY_EMBEDDING = peso_query_user * query_user_emb + (1-peso_query_user) * query_item_emb
 
 
 		# 2) Formar los embeddings donde buscar (search on)
