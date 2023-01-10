@@ -6,12 +6,24 @@ import torch
 
 
 
+def funcRacional_visitas(x):
+	return (1 * x) / (x + 5)
+
+def funcRacional_compras(x):
+	return (5 * x) / (x + 1)
+
+def getPeso(col_compras, col_visitias):
+	return funcRacional_compras(col_compras + funcRacional_visitas(col_visitias) )
+
+
+
 
 def prepare_df_pairs(df_pairs):
 
 	#df_pairs.rename(columns={"customer_id": "user_id", "product_id": "item_id"}, inplace=True
 	df_pairs["user_id"] = df_pairs["customer_id"]
 	df_pairs["item_id"] = df_pairs["product_id"]
+	df_pairs["peso"]    = getPeso(df_pairs["compras"], df_pairs["visto"])
 
 	return df_pairs
 
@@ -49,7 +61,6 @@ class CollabFilteringDataset(torch.utils.data.Dataset):
 		self.df_pairs = prepare_df_pairs(df_pairs)
 		self.df_users = prepare_df_users(df_users)
 		self.df_items = prepare_df_items(df_items)
-		
 
 		#print(f"Hy un total de {self.NUM_ACTIVE_USERS} usuarios que interaccionan de un total de {len(df_users)} usuarios.")
 		#print(f"Hy un total de {self.NUM_ACTIVE_ITEMS} prudcutos que interaccionan de un total de {len(df_items)} productos.")
@@ -165,7 +176,7 @@ class RecSys2():
 	#################################### ENTRENAR #################################### 
 	#################################### MODELO   ####################################
 
-	def entrenar_modelo(self, df_pairs, df_users, df_items, valid_pct=0.2):
+	def entrenar_modelo(self, df_pairs, df_users, df_items):
 
 		BATCH_SIZE = 64
 		LEARNING_RATE = 0.001
@@ -320,7 +331,8 @@ class RecSys2():
 
 		# 3.4: sort by similarity value
 		sorted_order = selected_similarities.argsort(descending=True) # Descending order positions
-		return selected_ids[sorted_order]
+		return list(zip(selected_ids[sorted_order].tolist(),
+                        selected_similarities[sorted_order].tolist()))
 
 
 
