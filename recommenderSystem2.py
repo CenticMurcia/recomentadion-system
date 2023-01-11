@@ -256,12 +256,13 @@ class RecSys2():
 	def recomendar(self,
 		query_user_ids = [],
 		query_item_ids = [],
-		peso_query_user = 0.5,  #peso_query_item = 1 - peso_query_user
+		peso_query_user = 0.5,  # peso_query_item = 1 - peso_query_user
 		searchOn_new_users = False,
 		searchOn_act_users = False,
 		searchOn_new_items = False,
 		searchOn_act_items = False,
-		limit=0.5):
+		limit_thres=0.5
+		limit_max=1000):
 
 
 		assert peso_query_user > 0 and peso_query_user < 1
@@ -323,7 +324,7 @@ class RecSys2():
 		similarities = SEARCHON_EMBS @ QUERY_EMBEDDING
 
 		# 3.2. Get good ones by threashold
-		bool_matches = similarities > limit
+		bool_matches = similarities > limit_thres
 
 		# 3.3. Filter by matched
 		selected_ids          = SEARCHON_IDS[bool_matches]
@@ -332,7 +333,7 @@ class RecSys2():
 		# 3.4: sort by similarity value
 		sorted_order = selected_similarities.argsort(descending=True) # Descending order positions
 		return list(zip(selected_ids[sorted_order].tolist(),
-                        selected_similarities[sorted_order].tolist()))
+                        selected_similarities[sorted_order].tolist()))[:limit_max]
 
 
 
